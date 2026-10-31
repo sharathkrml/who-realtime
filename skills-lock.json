@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "skills": {
+    "android-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/android/SKILL.md",
+      "computedHash": "4dd3502bf04dc3b81a58ca1af9a1a7fb08a0e35359db2a59530f9105331758b2"
+    },
+    "ios-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ios/SKILL.md",
+      "computedHash": "4e61d1d5668179860746145d26b9e17179b4822e012a480d6c077656d0f9d324"
+    },
+    "ipados-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ipados/SKILL.md",
+      "computedHash": "d3c6a09efe0c6a74a08a944d4deb78b1a71595a45a4c25f4b8eedb657d16bca8"
+    },
+    "macos-auto-update": {
+      "source": "fayazara/macos-app-skills",
+      "sourceType": "github",
+      "skillPath": "auto-update/SKILL.md",
+      "computedHash": "704f045635049dcb82380210ec0d337ebce28f41ee9ba28d6211ae3c1c46b190"
+    },
+    "macos-build": {
+      "source": "fayazara/macos-app-skills",
+      "sourceType": "github",
+      "skillPath": "build/SKILL.md",
+      "computedHash": "de7a069d100ebb3453269f0d4871401021f3d6eb46bd3dfc1668460bbab0f0bc"
+    },
+    "macos-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/macos/SKILL.md",
+      "computedHash": "fdbeb208feb60e5ed08226e4e1e714eade6cfe6530ad27c792992823de63ca0d"
+    },
+    "macos-notch-ui": {
+      "source": "fayazara/macos-app-skills",
+      "sourceType": "github",
+      "skillPath": "notch-ui/SKILL.md",
+      "computedHash": "e39093236fbccf2957182c117af013129000985205a3bf65c39eb42a7606afd4"
+    },
+    "macos-patterns": {
+      "source": "fayazara/macos-app-skills",
+      "sourceType": "github",
+      "skillPath": "macos-patterns/SKILL.md",
+      "computedHash": "ae976dcae49d6a40b131b75104ad58491d9cc076a68c6175f6daba60a266acaf"
+    },
+    "macos-release": {
+      "source": "fayazara/macos-app-skills",
+      "sourceType": "github",
+      "skillPath": "release/SKILL.md",
+      "computedHash": "b313d525a5b732d02b889ec3772594d5edbc327ddb7471827df3d9abf7e5a0f9"
+    },
+    "macos-settings-ui": {
+      "source": "fayazara/macos-app-skills",
+      "sourceType": "github",
+      "skillPath": "settings-ui/SKILL.md",
+      "computedHash": "31d1a4f1d86375291fded0015e93f48e725d24ce72573028eb72902d70aad250"
+    },
+    "tvos-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tvos/SKILL.md",
+      "computedHash": "7e8751618b4421617d083191150b6324eaa2bdf03509b3cc846763b770ff5b3f"
+    },
+    "visionos-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/visionos/SKILL.md",
+      "computedHash": "88eaf0e697c6b3bf8dd16dbd1d0618b098c94ad18052f892054d64c16f728eac"
+    },
+    "watchos-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/watchos/SKILL.md",
+      "computedHash": "1cc331d84dc58e88246cff2082b45f050180bead20d8667ee2bc8644de04103a"
+    },
+    "web-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web/SKILL.md",
+      "computedHash": "fc94f93418a39d2c224b450de96799f9481d779851c404c355d5d5d61302b3c9"
+    },
+    "write-swift": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/write-swift/SKILL.md",
+      "computedHash": "f20bb9cf51dbee1900b264820a12f1d3d378dc4d23ac758e7ba9e644c49a2459"
+    }
+  }
+}
