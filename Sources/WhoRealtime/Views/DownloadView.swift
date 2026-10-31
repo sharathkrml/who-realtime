@@ -70,30 +70,72 @@ struct DownloadCard: View {
     }
 }
 
+/// Failure surface: a headline, the reason, and — when the fix lives in
+/// System Settings — named deep links instead of a sentence telling the user
+/// to go hunting for a pane.
 struct FailedCard: View {
     @Environment(SessionModel.self) private var model
-    let message: String
+    let failure: SessionModel.Failure
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label("Something went wrong", systemImage: "exclamationmark.triangle.fill")
+        VStack(alignment: .leading, spacing: 12) {
+            Label(failure.title, systemImage: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
                 .font(.footnote.weight(.semibold))
-            Text(message)
+            Text(failure.message)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
-            HStack {
+            if failure.permissions { permissionHelp }
+            HStack(spacing: 8) {
                 Button("Try again") { model.retryAfterFailure() }
                 Button("Copy details") {
                     NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(message, forType: .string)
+                    NSPasteboard.general.setString("\(failure.title): \(failure.message)", forType: .string)
                 }
                 .controlSize(.small)
+                Spacer()
             }
         }
         .padding(14)
         .card(radius: 12)
+    }
+
+    private var permissionHelp: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Turn Who Realtime on in both panes, then try again. If it still fails, quit and reopen the app.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 8) {
+                SettingsPaneButton(title: "Microphone", pane: "Privacy_Microphone")
+                if model.mode == .call {
+                    SettingsPaneButton(title: "System Audio", pane: "Privacy_ScreenCapture")
+                }
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.orange.opacity(0.10), in: .rect(cornerRadius: 10))
+    }
+}
+
+/// One Privacy & Security pane. `Privacy_ScreenCapture` is the pane System
+/// Settings labels "Screen & System Audio Recording" — the one process taps
+/// are gated by.
+private struct SettingsPaneButton: View {
+    let title: String
+    let pane: String
+
+    var body: some View {
+        Button {
+            guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane)") else { return }
+            NSWorkspace.shared.open(url)
+        } label: {
+            Label("\(title) Settings", systemImage: "gearshape")
+        }
+        .controlSize(.small)
+        .help("Opens System Settings → Privacy & Security")
     }
 }

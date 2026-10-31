@@ -1,0 +1,158 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Needed for creating releases
+permissions:
+  contents: write
+
+env:
+  HAS_APPLE_SECRETS: ${{ secrets.MAC_CERTS_P12_BASE64 != '' }}
+
+jobs:
+  build:
+    # Package.swift is swift-tools-version 6.2 (Xcode 26 toolchain) and targets macOS 15.
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 'latest-stable'
+
+      - name: Test
+        run: swift test
+
+      - name: Build universal binaries
+        run: swift build -c release --arch arm64 --arch x86_64
+
+      # Multi-arch SwiftPM builds land here, not in .build/release.
+      - name: Make app bundles
+        run: |
+          BIN_DIR=".build/apple/Products/Release"
+          if [ ! -x "$BIN_DIR/WhoMenuBar" ]; then
+            echo "::error::Universal build output missing at $BIN_DIR"
+            find .build -name WhoMenuBar -type f
+            exit 1
+          fi
+          BIN_DIR="$BIN_DIR" scripts/make-app.sh
+          lipo -archs "build/WhoRealtime.app/Contents/MacOS/WhoMenuBar"
+          lipo -archs "build/WhoRealtime Windowed.app/Contents/MacOS/WhoWindowed"
+
+      # ---- Apple Developer Account required below ----
+      # Skipped when MAC_CERTS_P12_BASE64 is absent; the DMG stays ad-hoc signed.
+
+      - name: Import signing certificate
+        if: env.HAS_APPLE_SECRETS == 'true'
+        env:
+          P12_BASE64: ${{ secrets.MAC_CERTS_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.MAC_CERTS_P12_PASSWORD }}
+        run: |
+          if [[ -z "$P12_BASE64" || -z "$P12_PASSWORD" ]]; then
+            echo "::error::MAC_CERTS_P12_BASE64 and MAC_CERTS_P12_PASSWORD must both be set."
+            exit 1
+          fi
+
+          CERT_PATH="$RUNNER_TEMP/signing-cert.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(uuidgen)
+
+          echo "$P12_BASE64" | base64 --decode > "$CERT_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          # codesign: must be in the partition list: signing is done by codesign
+          # directly, and a narrow list makes it block on a GUI prompt.
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          rm -f "$CERT_PATH"
+
+      - name: Code sign apps
+        if: env.HAS_APPLE_SECRETS == 'true'
+        env:
+          SIGNING_IDENTITY: ${{ secrets.SIGNING_IDENTITY || 'Developer ID Application' }}
+        run: |
+          # Inside-out: sign executables before the bundle that contains them.
+          for APP in build/*.app; do
+            echo "Signing $APP"
+            find "$APP/Contents/MacOS" -type f -perm +111 | while read -r f; do
+              file "$f" | grep -q "Mach-O" || continue
+              codesign --force --options runtime --timestamp \
+                --sign "$SIGNING_IDENTITY" "$f"
+            done
+            # No entitlements file in this project. If one is added, pass
+            # --entitlements "$ENTITLEMENTS" here and in the DMG flow.
+            codesign --force --options runtime --timestamp \
+              --sign "$SIGNING_IDENTITY" "$APP"
+            codesign --verify --deep --strict --verbose=2 "$APP"
+          done
+
+      - name: Notarize apps
+        if: env.HAS_APPLE_SECRETS == 'true'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        run: |
+          if [[ -z "$APPLE_ID" || -z "$APP_PASSWORD" || -z "$TEAM_ID" ]]; then
+            echo "::error::Missing notarization secrets (APPLE_ID, APP_SPECIFIC_PASSWORD, or APPLE_TEAM_ID)"
+            exit 1
+          fi
+
+          for APP in build/*.app; do
+            NAME=$(basename "$APP" .app)
+            ZIP="$RUNNER_TEMP/$NAME.zip"
+            ditto -c -k --keepParent "$APP" "$ZIP"
+
+            # notarytool --wait still exits 0 when Apple rejects, so parse status.
+            SUBMISSION_OUT=$(xcrun notarytool submit "$ZIP" \
+              --apple-id "$APPLE_ID" \
+              --team-id "$TEAM_ID" \
+              --password "$APP_PASSWORD" \
+              --wait 2>&1) || true
+            echo "$SUBMISSION_OUT"
+
+            SUBMISSION_ID=$(echo "$SUBMISSION_OUT" | grep -m1 "^  id:" | awk '{print $NF}')
+            STATUS=$(echo "$SUBMISSION_OUT" | grep "^  status:" | awk '{print $NF}')
+
+            if [[ "$STATUS" != "Accepted" ]]; then
+              echo "--- Notarization Log ($NAME) ---"
+              if [[ -n "$SUBMISSION_ID" ]]; then
+                xcrun notarytool log "$SUBMISSION_ID" \
+                  --apple-id "$APPLE_ID" --team-id "$TEAM_ID" \
+                  --password "$APP_PASSWORD" 2>&1 || true
+              fi
+              echo "::error::Notarization failed for $NAME with status: $STATUS"
+              exit 1
+            fi
+
+            xcrun stapler staple "$APP"
+            rm -f "$ZIP"
+          done
+
+      - name: Create DMG
+        run: SKIP_BUILD=1 scripts/make-dmg.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WhoRealtime-dmg
+          path: build/WhoRealtime.dmg
+
+      # ---- Release (tag-triggered only) ----
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/WhoRealtime.dmg
+          generate_release_notes: true

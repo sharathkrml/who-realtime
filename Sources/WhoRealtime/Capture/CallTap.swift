@@ -35,11 +35,17 @@ nonisolated final class CallTap: @unchecked Sendable {
         guard let tapUID = Self.stringProperty(tapID, kAudioTapPropertyUID) else {
             throw AudioError(status: -1, action: "reading the tap UID")
         }
+        // A tap belongs in the tap list. Listed as a subdevice instead, the
+        // aggregate has no clock and AudioDeviceStart fails with 'nope'
+        // (kAudioHardwareIllegalOperationError).
         let aggregateDict: [String: Any] = [
             "name": "Who Realtime call tap",
             "uid": "com.whorealtime.tap.\(UUID().uuidString)",
             "private": true,
-            "subdevices": [["uid": tapUID, "drift": UInt32(2)]],
+            kAudioAggregateDeviceTapListKey: [[
+                kAudioSubTapUIDKey: tapUID,
+                kAudioSubTapDriftCompensationKey: true,
+            ]],
         ]
         var status = AudioHardwareCreateAggregateDevice(aggregateDict as CFDictionary, &aggregateID)
         guard status == noErr else { throw AudioError(status: status, action: "creating the tap aggregate device") }
@@ -88,11 +94,10 @@ nonisolated final class CallTap: @unchecked Sendable {
 
     deinit { stop() }
 
-    private struct AudioError: Error, CustomStringConvertible {
+    private struct AudioError: LocalizedError {
         let status: OSStatus
         let action: String
-        var description: String { "\(action) failed (OSStatus \(status))." }
-        var localizedDescription: String { description }
+        var errorDescription: String? { "\(action) failed (OSStatus \(status))." }
     }
 
     // MARK: - Property plumbing

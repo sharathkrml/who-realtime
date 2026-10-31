@@ -19,6 +19,24 @@
       "skillPath": "skills/ipados/SKILL.md",
       "computedHash": "d3c6a09efe0c6a74a08a944d4deb78b1a71595a45a4c25f4b8eedb657d16bca8"
     },
+    "macos-app-scaffold": {
+      "source": "XueshiQiao/macos-app-scaffold",
+      "sourceType": "github",
+      "skillPath": "skills/macos-app-scaffold/SKILL.md",
+      "computedHash": "a3c0c0bd99b5bd410b5542e62711798698f2587d55d42eafd656991c49f77e39"
+    },
+    "macos-app-scaffold-enhance": {
+      "source": "XueshiQiao/macos-app-scaffold",
+      "sourceType": "github",
+      "skillPath": "skills/macos-app-scaffold-enhance/SKILL.md",
+      "computedHash": "6d335f87b83e9eb6a8b55b1fef69e1bedfe5b0e99a9ceebc78f127b349067eb7"
+    },
+    "macos-app-scaffold-new": {
+      "source": "XueshiQiao/macos-app-scaffold",
+      "sourceType": "github",
+      "skillPath": "skills/macos-app-scaffold-new/SKILL.md",
+      "computedHash": "2be334069c024e683364c22ba0dc88c2f0494f51e268bfedfe6ecad21de4e3e2"
+    },
     "macos-auto-update": {
       "source": "fayazara/macos-app-skills",
       "sourceType": "github",

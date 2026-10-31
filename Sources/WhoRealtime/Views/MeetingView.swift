@@ -58,8 +58,8 @@ public struct MeetingView: View {
             FinishingCard().transition(swap)
         case .saved(let url):
             SavedCard(docURL: url).transition(swap)
-        case .failed(let message):
-            FailedCard(message: message).transition(swap)
+        case .failed(let failure):
+            FailedCard(failure: failure).transition(swap)
         }
     }
 }

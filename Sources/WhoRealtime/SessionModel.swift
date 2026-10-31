@@ -17,6 +17,14 @@ public final class SessionModel {
         var id: String { rawValue }
     }
 
+    /// A failed phase carries what to say, not a raw error string: the card
+    /// needs a headline, and `permissions` tells it to point at System Settings.
+    struct Failure: Equatable {
+        let title: String
+        let message: String
+        var permissions = false
+    }
+
     enum Phase: Equatable {
         case missingModels
         case models(fraction: Double)
@@ -24,7 +32,7 @@ public final class SessionModel {
         case recording
         case finishing
         case saved(URL)
-        case failed(String)
+        case failed(Failure)
     }
 
     private(set) var phase: Phase = .missingModels
@@ -87,6 +95,12 @@ public final class SessionModel {
     }
 
     func retryAfterFailure() {
+        // Capture failures retry straight into the picker; only a model
+        // failure needs the download path again.
+        if voz != nil, who != nil {
+            phase = .idle
+            return
+        }
         phase = .missingModels
         whoFraction = 0
         vozFraction = 0
@@ -115,7 +129,7 @@ public final class SessionModel {
             phase = .idle
             startAppPolling()
         } catch {
-            phase = .failed("Model setup failed: \(error.localizedDescription)")
+            phase = .failed(Failure(title: "Model setup failed", message: error.localizedDescription))
         }
     }
 
@@ -189,7 +203,9 @@ public final class SessionModel {
         }
         if mode == .call, selectedApp == nil {
             launching = false
-            phase = .failed("No app is outputting audio yet. Join the meeting with sound on — the list fills automatically as it plays.")
+            phase = .failed(Failure(
+                title: "No app is outputting audio yet",
+                message: "Join the meeting with sound on — the list fills automatically as it plays."))
             Sounds.failed()
             return
         }
@@ -270,10 +286,10 @@ public final class SessionModel {
         } catch {
             teardownCapture()
             launching = false
-            phase = .failed("""
-            Listening failed: \(error.localizedDescription). \
-            If a permission prompt was declined, allow it in System Settings → Privacy & Security.
-            """)
+            phase = .failed(Failure(
+                title: "Couldn't start listening",
+                message: error.localizedDescription,
+                permissions: true))
             Sounds.failed()
         }
     }
@@ -326,7 +342,7 @@ public final class SessionModel {
         } catch {
             logger.error("finishing failed: \(error.localizedDescription, privacy: .public)")
             Sounds.failed()
-            phase = .failed("Making the doc failed: \(error.localizedDescription)")
+            phase = .failed(Failure(title: "Couldn't build the doc", message: error.localizedDescription))
         }
     }
 

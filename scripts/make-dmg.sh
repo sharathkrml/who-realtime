@@ -5,7 +5,8 @@
 set -eu
 
 cd "$(dirname "$0")/.."
-scripts/make-app.sh
+# CI sets SKIP_BUILD=1 after it has already built and signed the bundles.
+[ "${SKIP_BUILD:-0}" = 1 ] || scripts/make-app.sh
 
 STAGE="build/dmg"
 DMG="build/WhoRealtime.dmg"

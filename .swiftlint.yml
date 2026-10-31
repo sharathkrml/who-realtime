@@ -1,0 +1,35 @@
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - .build
+  - .swiftpm
+  - build
+
+line_length:
+  warning: 160
+  error: 220
+  ignores_comments: true
+
+identifier_name:
+  min_length: 2
+  excluded: [id]
+
+type_body_length:
+  warning: 400
+  error: 600
+
+file_length:
+  warning: 600
+  error: 900
+
+opt_in_rules:
+  - empty_count
+  - first_where
+  - redundant_nil_coalescing
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+
+disabled_rules:
+  - todo

@@ -7,6 +7,13 @@
 set -eu
 
 cd "$(dirname "$0")/.."
+
+# VERSION is the single source of truth; CI reads the same file and both bundle
+# plists get this value as CFBundleShortVersionString + CFBundleVersion.
+VERSION=$(tr -d '[:space:]' < VERSION)
+[ -n "$VERSION" ] || { echo "VERSION is empty" >&2; exit 1; }
+BIN_DIR="${BIN_DIR:-.build/release}"
+
 swift build -c release
 
 # App icon (drawn, not asset-catalogued) so both bundles stop looking like
@@ -34,9 +41,9 @@ menu_bar_plist() {
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>$VERSION</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>$VERSION</string>
     <key>LSMinimumSystemVersion</key>
     <string>15.0</string>
     <key>LSUIElement</key>
@@ -67,9 +74,9 @@ windowed_plist() {
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>$VERSION</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>$VERSION</string>
     <key>LSMinimumSystemVersion</key>
     <string>15.0</string>
     <key>NSMicrophoneUsageDescription</key>
@@ -83,7 +90,7 @@ bundle() { # $1 = app path, $2 = executable name, $3 = plist command name
     APP="$1"
     EXEC="$2"
     mkdir -p "$APP/Contents/MacOS"
-    cp ".build/release/$EXEC" "$APP/Contents/MacOS/$EXEC"
+    cp "$BIN_DIR/$EXEC" "$APP/Contents/MacOS/$EXEC"
     "$3" > "$APP/Contents/Info.plist"
     if [ -f "build/WhoRealtime.icns" ]; then
         mkdir -p "$APP/Contents/Resources"
