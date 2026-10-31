@@ -1,20 +1,21 @@
 import SwiftUI
 import WhoRealtime
 
-/// The regular windowed flavor: Dock app with a resizable window and a
-/// Session menu (⌘R toggles listening) for keyboard-first use.
+/// The full desktop flavor: a regular Dock app with a sidebar of past meetings
+/// and a resizable window. ⌘R toggles listening from anywhere in the app.
 @main
 struct WhoWindowedApp: App {
     @State private var model = SessionModel()
+    @State private var store = MeetingStore()
 
     var body: some Scene {
         Window("Who Realtime", id: "meeting") {
-            MeetingView()
+            MeetingWindowView()
                 .environment(model)
+                .environment(store)
                 .onAppear { model.bootstrapIfNeeded() }
-                .frame(minWidth: 420, minHeight: 520)
         }
-        .defaultSize(width: 520, height: 640)
+        .defaultSize(width: 940, height: 700)
         .commands {
             CommandMenu("Session") {
                 Button {

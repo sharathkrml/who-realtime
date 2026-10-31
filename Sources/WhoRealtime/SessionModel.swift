@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 import Observation
 import os
@@ -190,6 +191,18 @@ public final class SessionModel {
 
     private func beginSession() async {
         guard let voz, let who else { phase = .missingModels; launching = false; return }
+        // A denied mic is silent, not an error, and macOS does not re-prompt
+        // after a denial — ask before recording so a session can never run on
+        // an empty input with only a small banner to show for it.
+        guard await Self.micAccess() else {
+            launching = false
+            phase = .failed(Failure(
+                title: "Microphone access is off",
+                message: "Allow Who Realtime under Privacy & Security → Microphone, then try again.",
+                permissions: true))
+            Sounds.failed()
+            return
+        }
         // Give the meeting app a few seconds to actually start producing
         // audio (the IsRunningOutput flag flips on as soon as sound flows).
         // Polling keeps the picker live, but a short retry here avoids a
@@ -291,6 +304,14 @@ public final class SessionModel {
                 message: error.localizedDescription,
                 permissions: true))
             Sounds.failed()
+        }
+    }
+
+    private static func micAccess() async -> Bool {
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized: return true
+        case .notDetermined: return await AVCaptureDevice.requestAccess(for: .audio)
+        default: return false
         }
     }
 

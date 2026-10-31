@@ -61,6 +61,7 @@ struct SetupCard: View {
             }
             .fixedSize(horizontal: false, vertical: true)
         }
+        .centeredColumn()
     }
 
     private var appPicker: some View {

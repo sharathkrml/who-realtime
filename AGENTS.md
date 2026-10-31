@@ -11,9 +11,9 @@ Two app flavors on one shared library:
 
 | Target | Product | Notes |
 |---|---|---|
-| `WhoRealtime` | library | capture, attribution, doc, all SwiftUI views |
-| `WhoMenuBar` | `build/WhoRealtime.app` | `MenuBarExtra`, `LSUIElement` (no Dock icon) |
-| `WhoWindowed` | `build/WhoRealtime Windowed.app` | regular `Window` scene, ⌘R |
+| `WhoRealtime` | library | capture, attribution, doc + doc reader, all SwiftUI views |
+| `WhoMenuBar` | `build/Who Realtime Menu Bar.app` | `MenuBarExtra`, `LSUIElement` (no Dock icon) |
+| `WhoWindowed` | `build/WhoRealtime.app` | `NavigationSplitView` (record + meeting library), ⌘R |
 | `WhoTapCore` | ObjC shim | Core Audio process-tap creation |
 | `WhoRealtimeTests` | tests | Swift Testing (`@Test`), not XCTest |
 

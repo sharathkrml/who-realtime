@@ -13,7 +13,7 @@ DMG="build/WhoRealtime.dmg"
 
 rm -rf "$STAGE" "$DMG"
 mkdir -p "$STAGE"
-cp -R "build/WhoRealtime.app" "build/WhoRealtime Windowed.app" "$STAGE/"
+cp -R "build/WhoRealtime.app" "build/Who Realtime Menu Bar.app" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 
 hdiutil create -volname "Who Realtime" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null

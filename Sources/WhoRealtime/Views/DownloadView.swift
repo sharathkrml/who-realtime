@@ -21,6 +21,7 @@ struct DownloadCard: View {
         }
         .padding(14)
         .card(radius: 12)
+        .centeredColumn()
     }
 
     private var header: some View {
@@ -100,6 +101,7 @@ struct FailedCard: View {
         }
         .padding(14)
         .card(radius: 12)
+        .centeredColumn()
     }
 
     private var permissionHelp: some View {

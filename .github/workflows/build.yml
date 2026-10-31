@@ -44,8 +44,8 @@ jobs:
             exit 1
           fi
           BIN_DIR="$BIN_DIR" scripts/make-app.sh
-          lipo -archs "build/WhoRealtime.app/Contents/MacOS/WhoMenuBar"
-          lipo -archs "build/WhoRealtime Windowed.app/Contents/MacOS/WhoWindowed"
+          lipo -archs "build/WhoRealtime.app/Contents/MacOS/WhoWindowed"
+          lipo -archs "build/Who Realtime Menu Bar.app/Contents/MacOS/WhoMenuBar"
 
       # ---- Apple Developer Account required below ----
       # Skipped when MAC_CERTS_P12_BASE64 is absent; the DMG stays ad-hoc signed.

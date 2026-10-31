@@ -16,12 +16,12 @@ nonisolated final class LevelMeter: @unchecked Sendable {   // @unchecked: two M
             if magnitude > loudest { loudest = magnitude }
         }
         peak.withLock { if loudest > $0 { $0 = loudest } }
-        seen.withLock { $0 = true }
+        if loudest > 0 { seen.withLock { $0 = true } }
     }
 
     /// `peak` is the maximum absolute sample since the last drain; `hasSignal`
-    /// stays raised once any chunk arrived — that is how the UI can tell a
-    /// pending permission prompt from a silent source.
+    /// stays raised once a chunk carried sound — exact zeros mean the source is
+    /// muted, not merely quiet, so the UI can say so.
     func drain() -> (peak: Double, hasSignal: Bool) {
         let windowPeak = peak.withLock { value -> Float in
             let old = value

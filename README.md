@@ -4,8 +4,8 @@ A macOS app that listens to a meeting on your Mac and turns it into a speaker-at
 
 One library (`Sources/WhoRealtime`), two flavors of the app:
 
-- **Menu bar** — `WhoRealtime.app`, popover in the waveform menu bar item (no Dock icon). The icon flips to a record circle while a session is active.
-- **Windowed** — `Who Realtime Windowed.app`, a regular Dock app with a resizable window showing the same flow (⌘R toggles listening).
+- **Desktop** — `Who Realtime.app`: a regular Dock app. Record in the main pane, and every meeting already in `~/Documents/Meetings` is listed in the sidebar — click one to read it, copy the Markdown, or send it (and its recording) to the Trash. ⌘R toggles listening from anywhere.
+- **Menu bar** — `Who Realtime Menu Bar.app`, popover in the waveform menu bar item (no Dock icon). The icon flips to a record circle while a session is active.
 
 Both share one model cache (`~/Library/Application Support/WhoRealtime/Models`), so the models download once per Mac.
 
@@ -27,11 +27,11 @@ One-time download of both models (~550 MB from Hugging Face) happens on first la
 
 ```sh
 swift build            # or: scripts/make-app.sh
-scripts/make-app.sh    # two app bundles: build/WhoRealtime.app + build/"WhoRealtime Windowed.app"
+scripts/make-app.sh    # two app bundles: build/"WhoRealtime.app" + build/"Who Realtime Menu Bar.app"
 open build/WhoRealtime.app
 ```
 
-The menu bar app lives behind the waveform icon → Listen; the windowed app opens as a normal window. Recordings and docs go to `~/Documents/Meetings`. Speech recognition covers the model's 25 languages (English among them); tests: `swift test`.
+The desktop app opens as a normal window with the meeting list in the sidebar; the menu bar app lives behind the waveform icon → Listen. Recordings and docs go to `~/Documents/Meetings`. Speech recognition covers the model's 25 languages (English among them); tests: `swift test`.
 
 ## Layout
 
@@ -40,7 +40,7 @@ Sources/WhoTapCore      ObjC shim: CATapDescription process-tap creation
 Sources/WhoRealtime     shared library: capture, attribution, doc, views
 Sources/WhoRealtime/Views  SwiftUI surfaces: design tokens (glass on macOS 26), flow, transcript with live level meters, chimes/haptics
 Sources/WhoMenuBar      menu bar entry point (MenuBarExtra)
-Sources/WhoWindowed     windowed entry point (WindowScene)
+Sources/WhoWindowed     desktop entry point: sidebar of past meetings + the record flow
 Tests/                  attribution + doc + level-meter tests
 scripts/make-icon.swift draws build/WhoRealtime.icns (no asset catalog)
 ```

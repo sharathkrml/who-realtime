@@ -15,6 +15,12 @@ struct LevelMeterTests {
         #expect(meter.drain().peak == 0)
     }
 
+    @Test func exactZerosAreNotSignal() {
+        let meter = LevelMeter()
+        meter.record([0, 0, 0])
+        #expect(!meter.drain().hasSignal)
+    }
+
     @Test func displayDecaysTowardZeroAtTheWindowPeak() {
         #expect(LevelMeter.display(previous: 0.5, peak: 0.9) == 0.9)   // rise is instant
         var previous = 1.0

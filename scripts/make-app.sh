@@ -20,7 +20,8 @@ swift build -c release
 # blank boxes in Finder/Dock.
 swift scripts/make-icon.swift
 
-rm -rf "build/WhoRealtime.app" "build/WhoRealtime Windowed.app"
+# The third name is the pre-desktop-app build; cleared so nobody launches it.
+rm -rf "build/WhoRealtime.app" "build/Who Realtime Menu Bar.app" "build/WhoRealtime Windowed.app"
 
 menu_bar_plist() {
     cat <<PLIST
@@ -29,9 +30,9 @@ menu_bar_plist() {
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Who Realtime</string>
+    <string>Who Realtime Menu Bar</string>
     <key>CFBundleDisplayName</key>
-    <string>Who Realtime</string>
+    <string>Who Realtime Menu Bar</string>
     <key>CFBundleIdentifier</key>
     <string>com.whorealtime.app</string>
     <key>CFBundleExecutable</key>
@@ -62,9 +63,9 @@ windowed_plist() {
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Who Realtime Windowed</string>
+    <string>Who Realtime</string>
     <key>CFBundleDisplayName</key>
-    <string>Who Realtime Windowed</string>
+    <string>Who Realtime</string>
     <key>CFBundleIdentifier</key>
     <string>com.whorealtime.windowed</string>
     <key>CFBundleExecutable</key>
@@ -99,7 +100,9 @@ bundle() { # $1 = app path, $2 = executable name, $3 = plist command name
     codesign --force --sign - "$APP"
 }
 
-bundle "build/WhoRealtime.app" WhoMenuBar menu_bar_plist
-bundle "build/WhoRealtime Windowed.app" WhoWindowed windowed_plist
+# Bundle IDs are frozen (mic + tap grants are keyed by them), so they no longer
+# spell out which flavor is which — the display names do.
+bundle "build/Who Realtime Menu Bar.app" WhoMenuBar menu_bar_plist
+bundle "build/WhoRealtime.app" WhoWindowed windowed_plist
 
-echo "Built build/WhoRealtime.app and build/WhoRealtime Windowed.app"
+echo "Built build/WhoRealtime.app and build/Who Realtime Menu Bar.app"

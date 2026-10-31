@@ -17,6 +17,18 @@ struct RecordingCard: View {
                 .clipShape(.rect(cornerRadius: 12))
                 .card(radius: 12)
                 .frame(minHeight: 290, maxHeight: transcriptMax ?? .infinity)
+                .overlay {
+                    // The first seconds are an empty card; say what is happening
+                    // instead of showing nothing.
+                    if model.lines.isEmpty, model.tailText.isEmpty {
+                        ContentUnavailableView {
+                            Label("Listening", systemImage: "waveform")
+                        } description: {
+                            Text("The first line appears when someone speaks.")
+                        }
+                        .allowsHitTesting(false)
+                    }
+                }
             recordBar
         }
     }

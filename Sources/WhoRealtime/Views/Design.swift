@@ -46,6 +46,13 @@ private struct HeroButton: ViewModifier {
 extension View {
     func card(radius: CGFloat = 12) -> some View { modifier(GlassCard(radius: radius)) }
     func heroStyle() -> some View { modifier(HeroButton()) }
+
+    /// Keeps a self-contained card at a readable measure in a wide window; a
+    /// no-op in the popover, which is already narrower than the cap.
+    func centeredColumn(_ maxWidth: CGFloat = 460) -> some View {
+        frame(maxWidth: maxWidth, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center)
+    }
 }
 
 // MARK: - Transcript height budget

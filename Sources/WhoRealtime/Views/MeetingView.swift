@@ -7,17 +7,23 @@ public struct MeetingView: View {
     @Environment(SessionModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    /// Off in the windowed app: the window title already says which app this
+    /// is, so the in-card header is only earning its space in the popover.
+    private let showsHeader: Bool
+
     private var swap: some Transition {
         // Reduce Motion is honored by animation(_:value:) on the container:
         // a nil animation swaps content instantly instead of animating.
         .opacity.combined(with: .offset(y: 8))
     }
 
-    public init() {}
+    public init(showsHeader: Bool = true) {
+        self.showsHeader = showsHeader
+    }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            header
+            if showsHeader { header }
             content
         }
         .padding(.horizontal, 16)
